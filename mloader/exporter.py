@@ -3,6 +3,7 @@ from abc import ABCMeta, abstractmethod
 from itertools import chain
 from pathlib import Path
 from typing import Union, Optional
+import re
 
 from mloader.constants import Language
 from mloader.response_pb2 import Title, Chapter
@@ -44,6 +45,7 @@ class ExporterBase(metaclass=ABCMeta):
         self.chapter_name = " ".join(
             (self._chapter_prefix, self._chapter_suffix)
         )
+        self.chapter_name = re.sub(r'\(v\d+\)|Volume \d+|Vol\.\d+', '', self.chapter_name)
 
     def _is_extra(self, chapter_name: str) -> bool:
         return chapter_name.strip("#") == "ex"
@@ -69,16 +71,16 @@ class ExporterBase(metaclass=ABCMeta):
             chapter_num = chapter_name_to_int(next_chapter_name)
             if chapter_num is not None:
                 chapter_num -= 1
-                prefix = "c" if chapter_num < 1000 else "d"
+                prefix = "c"
         else:
             chapter_num = chapter_name_to_int(chapter_name)
             if chapter_num is not None:
-                prefix = "c" if chapter_num < 1000 else "d"
+                prefix = "c"
 
         if chapter_num is None:
             chapter_num = escape_path(chapter_name)
 
-        components.append(f"{prefix}{chapter_num:0>3}{suffix}")
+        components.append(f"{prefix}{chapter_num:0>4}{suffix}")
         components.append("(web)")
         return " ".join(components)
 
